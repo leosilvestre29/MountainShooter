@@ -7,7 +7,7 @@ from pygame import Surface, Rect
 from pygame.font import Font
 
 from code.Const import C_WHITE, WIN_HEIGHT, MENU_OPTION, EVENT_ENEMY, SPAWN_TIME, C_GREEN, C_CYAN, EVENT_TIMEOUT, \
-    TIMEOUT_STEP, TIMEOUT_LEVEL
+    TIMEOUT_STEP, TIMEOUT_LEVEL, TIMEOUT_LEVEL3
 from code.Enemy import Enemy
 from code.Entity import Entity
 from code.EntityFactory import EntityFactory
@@ -17,7 +17,7 @@ from code.Player import Player
 
 class Level:
     def __init__(self, window: Surface, name: str, game_mode: str, player_score: list[int]):
-        self.timeout = TIMEOUT_LEVEL
+        self.timeout = TIMEOUT_LEVEL if name != 'Level3' else TIMEOUT_LEVEL3
         self.window = window
         self.name = name
         self.game_mode = game_mode
@@ -42,7 +42,9 @@ class Level:
             for ent in self.entity_list:
                 self.window.blit(source=ent.surf, dest=ent.rect)
                 ent.move()
+
                 if isinstance(ent, (Player, Enemy)):
+                    # Verifica se o inimigo ou jogador deve disparar
                     shoot = ent.shoot()
                     if shoot is not None:
                         self.entity_list.append(shoot)
@@ -55,7 +57,12 @@ class Level:
                     pygame.quit()
                     sys.exit()
                 if event.type == EVENT_ENEMY:
-                    choice = random.choice(('Enemy1', 'Enemy2'))
+                    if self.name == 'Level3':
+                        # Apenas Enemy3 no Level3
+                        choice = 'Enemy3'
+                    else:
+                        # Enemy1 ou Enemy2 nos outros níveis
+                        choice = random.choice(('Enemy1', 'Enemy2'))
                     self.entity_list.append(EntityFactory.get_entity(choice))
                 if event.type == EVENT_TIMEOUT:
                     self.timeout -= TIMEOUT_STEP
